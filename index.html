@@ -1,0 +1,74 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Linktree</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen">
+    <div class="max-w-md w-full bg-gray-800 rounded-lg shadow-lg p-6 text-center">
+        <!-- Profile Section -->
+        <img class="w-24 h-24 rounded-full mx-auto mb-4" src="https://media.licdn.com/dms/image/v2/D4E03AQFtOczmQl3N3g/profile-displayphoto-crop_800_800/B4EZjH3gwZHgAQ-/0/1755699877432?e=1761177600&v=beta&t=czHbxRLHnv9Gdx0zo34BKAntz1Z8OOBa0cpIOPd6PoY" alt="Profile Picture">
+        <h1 class="text-2xl font-bold text-white">Amirmahdi Tafreshi</h1>
+        <p class="text-gray-400 mb-6">DevOps / Back-End Developer</p>
+
+        <!-- Links Section -->
+        <div class="space-y-4">
+            <a href="resume/Resume.pdf" target="_blank" class="block w-full bg-blue-700 text-white py-3 rounded-lg hover:bg-blue-800 transition flex items-center justify-center font-inter font-semibold">
+                <i class="fas fa-file-alt mr-2"></i> Resume
+            </a>
+            <a href="https://github.com/0vj" target="_blank" class="block w-full bg-blue-700 text-white py-3 rounded-lg hover:bg-blue-800 transition flex items-center justify-center font-inter font-semibold">
+                <i class="fab fa-github mr-2"></i> GitHub
+            </a>
+            <a href="https://www.linkedin.com/in/amirmahdi-tafreshi" target="_blank" class="block w-full bg-blue-700 text-white py-3 rounded-lg hover:bg-blue-800 transition flex items-center justify-center font-inter font-semibold">
+                <i class="fab fa-linkedin mr-2"></i> LinkedIn
+            </a>
+            <a href="mailto:a.tafreshi440@gmail.com" class="block w-full bg-blue-700 text-white py-3 rounded-lg hover:bg-blue-800 transition flex items-center justify-center font-inter font-semibold">
+                <i class="fas fa-envelope mr-2"></i> Email Me
+            </a>
+        </div>
+    </div>
+</body>
+</html>
